@@ -1,0 +1,8 @@
+# Novamail builds with the GNU toolchain (see src-tauri/rust-toolchain.toml).
+#
+# MinGW-w64 is installed via winget, which puts `x86_64-w64-mingw32-gcc` on PATH
+# via its Links directory — but not the bare `gcc` name that rustc looks for by
+# default. Point the GNU target at the explicit MinGW linker so `cargo` and
+# `tauri` link without any manual PATH tweaking.
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"

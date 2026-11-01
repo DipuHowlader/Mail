@@ -1,0 +1,29 @@
+# === Node / frontend ===
+node_modules/
+dist/
+
+# === Runtime / build output ===
+release/
+*.log
+
+# Rust build artifacts (each can be hundreds of MB; never ship to git)
+src-tauri/target/
+.target-tauri-gnu-audit/
+*.exe
+*.pdb
+
+# Vendored Clearcote Chromium runtime (~504 MB), fetched on the build machine by
+# `scripts/prepare-browser.cjs` and shipped inside the installer via Tauri
+# bundle.resources. It is intentionally not committed to git: chrome.dll is
+# 386 MB, far past GitHub's 100 MB per-file limit.
+vendor/clearcote/
+
+# === Secrets ===
+.env
+.env.*
+!.env.example
+
+# === OS / editor junk ===
+nul
+Thumbs.db
+.DS_Store

@@ -1,0 +1,94 @@
+[package]
+name = "novamail"
+version = "1.1.0"
+description = "Novamail — premium multi-account desktop email client for Google Workspace and Gmail accounts."
+authors = ["IPPO"]
+license = "UNLICENSED"
+repository = ""
+edition = "2024"
+rust-version = "1.90"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "novamail_lib"
+# Desktop only needs an rlib. `cdylib` is only used for mobile and makes the
+# MinGW linker emit every dependency symbol as an export, which overflows the
+# PE ordinal limit ("export ordinal too large").
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.3", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+log = "0.4"
+# `image-png` enables `tauri::image::Image::from_bytes`, which `runtime.rs` uses
+# for the window-icon fallback when no bundled icon is configured.
+tauri = { version = "2.12.4", features = ["image-png"] }
+tauri-plugin-log = "2"
+# License verification talks to the license service over HTTPS. We pin the
+# OS-native TLS backend (Windows: schannel via native-tls) instead of reqwest's
+# default rustls + aws-lc backend: no cmake/nasm build step and a much smaller
+# dependency graph, which matters for the "lighter app" goal. Uses the OS trust
+# store and system proxy, like the previous desktop runtime.
+reqwest = { version = "0.13", default-features = false, features = [
+    "json",
+    "native-tls",
+    "charset",
+    "http2",
+    "system-proxy",
+    # The egress-geo lookup goes *through* the configured proxy, which may be SOCKS5. Without this
+    # feature reqwest refuses the `socks5h://` URL and the lookup silently falls back to the host's
+    # region — the exact leak the lookup exists to prevent.
+    "socks",
+] }
+sha2 = "0.10"
+hex = "0.4"
+dirs = "7"
+uuid = { version = "1", features = ["v4"] }
+base64 = "0.22"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "net", "time", "io-util", "sync", "macros"] }
+rfd = "0.17.2"
+csv = "1.4.0"
+calamine = "0.36.1"
+# Browser driver: drives the vendored Clearcote Chromium over the Chrome
+# DevTools Protocol. `futures`/`url`/`regex` are already in the tree (via
+# chromiumoxide and Tauri), so pinning them directly adds no new crates.
+chromiumoxide = "0.9.1"
+futures = "0.3"
+url = "2"
+regex = "1"
+zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
+# Date handling for the template engine's `date` filter and the generated
+# `date` variable. `chrono` is already in the dependency graph (via the Tauri
+# stack), so pinning it directly adds no new crates; `clock` gives us the
+# local timezone the JS engine used (`new Date()` + `getDate()` etc.).
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+# The Gmail send pipeline sanitizes the inlined email HTML into a clipboard
+# payload. `html5ever` is a browser-grade HTML5 parser (the Rust analogue of the
+# `htmlparser2` used by the former automation pipeline): its tokenizer decodes
+# character references exactly like `parseDOM(..., { decodeEntities: true })`.
+html5ever = "0.39"
+
+[target.'cfg(windows)'.dependencies]
+# Reads the OS MachineGuid so the license device id stays stable.
+winreg = "0.56"
+windows-sys = { version = "0.61.2", features = [
+    "Win32_Foundation",
+    "Win32_System_DataExchange",
+    "Win32_System_Memory",
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+] }
+
+# Size-oriented production build: the installer ships the whole browser
+# engine, so the app executable itself stays as small as a correct build
+# allows. Fat LTO + one codegen unit also drop dead code across the whole
+# dependency graph; `strip` removes debug symbols from the shipped binary.
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "s"
+strip = "symbols"

@@ -1,0 +1,41 @@
+{
+  "name": "novamail",
+  "productName": "Novamail",
+  "version": "1.1.0",
+  "description": "Premium multi-account desktop email client for Google Workspace and Gmail accounts.",
+  "author": "IPPO",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "tauri": "tauri",
+    "dev:tauri": "tauri dev",
+    "build:tauri": "tauri build",
+    "prepare:browser": "node scripts/prepare-browser.cjs",
+    "build": "npm run prepare:browser && vite build",
+    "preview": "vite preview",
+    "benchmark:document:tauri": "node scripts/benchmark-document-concurrency-tauri.cjs",
+    "benchmark:browser:tauri": "node scripts/benchmark-browser-concurrency-tauri.cjs",
+    "test:isolation:tauri": "node scripts/test-app-isolation-tauri.cjs",
+    "test:launcher-crash:tauri": "node scripts/test-launcher-crash-tauri.cjs",
+    "validate:launcher:tauri": "node scripts/validate-launcher-render-tauri.cjs",
+    "validate:launcher-registry:tauri": "node scripts/validate-launcher-registry-tauri.cjs",
+    "test": "npx vite build && npm run validate:launcher:tauri && npm run validate:launcher-registry:tauri && npm run test:isolation:tauri && npm run test:launcher-crash:tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.4",
+    "clearcote": "0.48.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.6.1",
+    "electron-to-chromium": "^1.5.456",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^3.4.19",
+    "vite": "^5.4.21"
+  }
+}

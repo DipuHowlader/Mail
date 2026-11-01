@@ -1,0 +1,7 @@
+# Novamail builds with the GNU toolchain on Windows.
+#
+# The MSVC Build Tools cannot be installed in this environment (their installer
+# requires UAC elevation), so the Rust shell and the C++ core both target
+# x86_64-pc-windows-gnu and link with MinGW-w64.
+[toolchain]
+channel = "stable-x86_64-pc-windows-gnu"
